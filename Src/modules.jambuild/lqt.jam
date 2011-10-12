@@ -74,12 +74,12 @@ rule build_qt_lib_binding BINDING_HEADER : DEPENDENCIES {
 		cpptoxml $(GEN_XML) ;
 	}
 
-	local bindingname_enum.cpp = @($(BINDING_NAME)_enum.cpp:G=$(BINDING_NAME)) ;
-	local bindingname_merged_build.cpp = @($(BINDING_NAME)_merged_build.cpp:G=$(BINDING_NAME)) ;
-	local bindingname_meta.cpp = @($(BINDING_NAME)_meta.cpp:G=$(BINDING_NAME)) ;
-	local bindingname_slot.cpp = @($(BINDING_NAME)_slot.cpp:G=$(BINDING_NAME)) ;
-	local bindingname_slot.hpp = @($(BINDING_NAME)_slot.hpp:G=$(BINDING_NAME)) ;
-	local bindingname_types.lua = @($(BINDING_NAME)_types.lua:G=$(BINDING_NAME)) ;
+	local bindingname_enum.cpp = [ C.GristFiles : @($(BINDING_NAME)_enum.cpp) ] ;
+	local bindingname_merged_build.cpp = [ C.GristFiles : @($(BINDING_NAME)_merged_build.cpp) ] ;
+	local bindingname_meta.cpp = [ C.GristFiles : @($(BINDING_NAME)_meta.cpp) ] ;
+	local bindingname_slot.cpp = [ C.GristFiles : @($(BINDING_NAME)_slot.cpp) ] ;
+	local bindingname_slot.hpp = [ C.GristFiles : @($(BINDING_NAME)_slot.hpp) ] ;
+	local bindingname_types.lua = [ C.GristFiles : @($(BINDING_NAME)_types.lua) ] ;
 	local targets = $(bindingname_enum.cpp) $(bindingname_merged_build.cpp) $(bindingname_meta.cpp) $(bindingname_slot.cpp) $(bindingname_slot.hpp) $(bindingname_types.lua) ;
 	MakeLocate $(targets) : $(LQT_GEN_DIR) ;
 
