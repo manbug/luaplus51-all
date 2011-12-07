@@ -1859,15 +1859,20 @@ namespace LPCD
 	inline void* CheckObject(lua_State* L, int index, const char* tname)
 	{
 		int type = lua_type(L, index);
-		if (type == LUA_TUSERDATA)
-			return *(void **)luaL_checkudata(L, index, tname);
-		else if (type == LUA_TTABLE) {
-			if (!lua_getmetatable(L, index))			/* does it have a metatable? */
-				luaL_typerror(L, index, tname);
-			lua_getfield(L, LUA_REGISTRYINDEX, tname);	/* get correct metatable */
-			if (!lua_rawequal(L, -1, -2))
-				luaL_typerror(L, index, tname);
-			lua_pop(L, 2);
+		if (type == LUA_TUSERDATA) {
+			if (tname)
+				return *(void**)luaL_checkudata(L, index, tname);
+			else
+				return *(void**)lua_touserdata(L, index);
+		} else if (type == LUA_TTABLE) {
+			if (tname) {
+				if (!lua_getmetatable(L, index))			/* does it have a metatable? */
+					luaL_typerror(L, index, tname);
+				lua_getfield(L, LUA_REGISTRYINDEX, tname);	/* get correct metatable */
+				if (!lua_rawequal(L, -1, -2))
+					luaL_typerror(L, index, tname);
+				lua_pop(L, 2);
+			}
 			lua_pushstring(L, "__object");
 			lua_rawget(L, index);
 			if (lua_type(L, -1) != LUA_TLIGHTUSERDATA)
@@ -2131,7 +2136,8 @@ template <typename Object, typename VarType>
 inline void lpcd_pushmemberpropertygetclosure(lua_State* L, VarType Object::* var)
 {
 	lua_pushlightuserdata(L, (void*)&(((Object*)0)->*var));
-	lua_pushcclosure(L, &LPCD::PropertyMemberHelper<Object, VarType>::PropertyGet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::PropertyMemberHelper<Object, VarType>::PropertyGet, 2);
 }
 
 
@@ -2139,7 +2145,8 @@ template <typename Object, typename VarType>
 inline void lpcd_pushmemberpropertysetclosure(lua_State* L, VarType Object::* var)
 {
 	lua_pushlightuserdata(L, (void*)&(((Object*)0)->*var));
-	lua_pushcclosure(L, &LPCD::PropertyMemberHelper<Object, VarType>::PropertySet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::PropertyMemberHelper<Object, VarType>::PropertySet, 2);
 }
 
 
@@ -2147,7 +2154,8 @@ template <typename Object, typename VarType>
 inline void lpcd_pushmemberinplacepropertygetclosure(lua_State* L, VarType Object::* var)
 {
 	lua_pushlightuserdata(L, (void*)&(((Object*)0)->*var));
-	lua_pushcclosure(L, &LPCD::InPlacePropertyMemberHelper<Object, VarType>::PropertyGet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::InPlacePropertyMemberHelper<Object, VarType>::PropertyGet, 2);
 }
 
 
@@ -2155,7 +2163,8 @@ template <typename Object, typename VarType>
 inline void lpcd_pushmemberinplacepropertysetclosure(lua_State* L, VarType Object::* var)
 {
 	lua_pushlightuserdata(L, (void*)&(((Object*)0)->*var));
-	lua_pushcclosure(L, &LPCD::InPlacePropertyMemberHelper<Object, VarType>::PropertySet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::InPlacePropertyMemberHelper<Object, VarType>::PropertySet, 2);
 }
 
 
@@ -2163,7 +2172,8 @@ template <typename VarType>
 inline void lpcd_pushglobalpropertygetclosure(lua_State* L, VarType* var)
 {
 	lua_pushlightuserdata(L, (void*)var);
-	lua_pushcclosure(L, &LPCD::PropertyGlobalHelper<VarType>::PropertyGet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::PropertyGlobalHelper<VarType>::PropertyGet, 2);
 }
 
 
@@ -2171,8 +2181,8 @@ template <typename VarType>
 inline void lpcd_pushglobalpropertysetclosure(lua_State* L, VarType* var)
 {
 	lua_pushlightuserdata(L, (void*)var);
-	lua_pushcclosure(L, &LPCD::PropertyGlobalHelper<VarType>::PropertySet, 1);
+	lua_pushlightuserdata(L, (void*)-2);
+	lua_pushcclosure(L, &LPCD::PropertyGlobalHelper<VarType>::PropertySet, 2);
 }
 
 #endif // LUAPLUS__LUAPLUSCD_H
-
